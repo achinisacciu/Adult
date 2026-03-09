@@ -1,0 +1,61 @@
+% Reset dei contatori per l'appendice
+\setcounter{figure}{0}
+\renewcommand{\thefigure}{A.\arabic{figure}}
+\setcounter{table}{0}
+\renewcommand{\thetable}{A.\arabic{table}}
+
+\section{Feature Encoding e Costruzione del Dataset}
+\label{app:feature_encoding}
+
+In questa sezione si descrive la procedura di trasformazione delle variabili categoriche in rappresentazioni numeriche idonee per l'elaborazione algoritmica, nonché la ricomposizione finale delle matrici di design.
+
+\subsection{Identificazione e Segregazione dei Tipi di Dato}
+
+Preliminarmente, lo spazio delle feature $\mathcal{X}$ è stato partizionato in due sottoinsiemi disgiunti in base alla tipologia del dato, utilizzando l'insieme di addestramento $X_{train}$ come unico riferimento per evitare contaminazioni informative (\textit{Look-ahead Bias}):
+
+\begin{itemize}
+    \item \textbf{Sottoinsieme Numerico ($\mathcal{X}_{num}$):} Include 5 variabili continue o discrete ordinali. Queste variabili non richiedono codifica ma saranno oggetto di successiva standardizzazione.
+    \item \textbf{Sottoinsieme Categorico ($\mathcal{X}_{cat}$):} Include 8 variabili nominali che necessitano di una trasformazione in vettori numerici.
+\end{itemize}
+
+\subsection{One-Hot Encoding}
+
+Per la codifica delle variabili in $\mathcal{X}_{cat}$, è stata adottata la tecnica del \textbf{One-Hot Encoding}. Tale metodo trasforma ogni variabile categorica con $k$ livelli distinti in $k$ variabili binarie (dummy variables) $\{d_1, \dots, d_k\}$, dove $d_i \in \{0, 1\}$.
+Nonostante l'incremento della dimensionalità, l'OHE è preferibile all'\textit{Ordinal Encoding} per variabili nominali prive di ordinamento intrinseco, in quanto evita di introdurre relazioni di distanza spuria tra le categorie (e.g., assumere che $2 \times \text{Divorced} = \text{Married}$).
+
+\subsection{Configurazione e Robustezza}
+Il trasformatore è stato configurato con i seguenti parametri critici per garantire la robustezza in produzione:
+\begin{itemize}
+    \item \textbf{Addestramento Esclusivo:} L'apprendimento del mapping categorie-colonne (\texttt{fit}) è avvenuto esclusivamente su $X_{train}$.
+    \item \textbf{Gestione Unknown Categories:} È stato abilitato il parametro \texttt{handle\_unknown='ignore'}. Qualora nel Test Set compaia una categoria non osservata durante il training, l'encoder genererà un vettore di zeri (tutte le dummy a 0) anziché sollevare un'eccezione, garantendo la continuità operativa del modello.
+\end{itemize}
+
+\subsection{Trasformazione e Integrità Dimensionale}
+
+L'applicazione dell'encoder ha comportato un'espansione dello spazio delle feature da 13 a 64 dimensioni.
+La trasformazione $T(\cdot)$ applicata a un generico vettore di input $\mathbf{x}$ è definita come la concatenazione delle componenti numeriche originali e delle componenti categoriche codificate:
+
+\begin{equation}
+    \mathbf{x}_{ready} = \left[ \mathbf{x}_{num} \parallel \text{OHE}(\mathbf{x}_{cat}) \right]
+\end{equation}
+
+\noindent
+La procedura ha generato 59 nuove feature binarie a partire dalle 8 categoriche originali.
+La verifica di integrità finale (Tabella \ref{tab:encoding_dims}) conferma la coerenza dimensionale tra i set e l'assenza di valori mancanti (\textit{NaN}) introdotti durante il processo di merge, che è stato eseguito preservando rigorosamente l'allineamento degli indici.
+
+\newpage
+\begin{table}[h]
+\centering
+\begin{tabular}{lccc}
+\toprule
+\textbf{Dataset} & \textbf{Righe ($N$)} & \textbf{Colonne ($D$)} & \textbf{Stato} \\
+\midrule
+Training Set ($X_{train}$) & 24.111 & 64 & Ready \\
+Test Set ($X_{test}$) & 6.028 & 64 & Ready \\
+\bottomrule
+\end{tabular}
+\caption{Dimensioni finali delle matrici di design post-encoding.}
+\label{tab:encoding_dims}
+\end{table}
+
+\newpage

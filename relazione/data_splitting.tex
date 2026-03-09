@@ -1,0 +1,61 @@
+% Reset dei contatori per l'appendice
+\setcounter{figure}{0}
+\renewcommand{\thefigure}{A.\arabic{figure}}
+\setcounter{table}{0}
+\renewcommand{\thetable}{A.\arabic{table}}
+
+\section{Preprocessing del Target e Partitioning}
+\label{app:data_splitting}
+
+In questa sezione si descrivono le operazioni preliminari di codifica della variabile dipendente e la strategia di suddivisione del dataset (\textit{Data Splitting}) adottata per la fase di addestramento e validazione.
+
+\subsection{Codifica della Variabile Target}
+
+La variabile target originale \texttt{income}, di natura categorica nominale, è stata sottoposta a una procedura di pulizia e mappatura binaria per renderla idonea agli algoritmi di classificazione.
+Al fine di garantire la robustezza del parsing contro eventuali artefatti di formattazione (e.g., spaziature o punteggiatura residua come \texttt{'<=50K.'}), è stata applicata una funzione di normalizzazione delle stringhe prima della codifica.
+\noindent
+La trasformazione è definita dalla seguente mappatura $M: \mathcal{Y}_{raw} \to \{0, 1\}$:
+\begin{equation}
+    y_i = 
+    \begin{cases} 
+    0 & \text{se } \texttt{income}_i \in \{\text{'<=50K'}\} \\
+    1 & \text{se } \texttt{income}_i \in \{\text{'>50K'}\}
+    \end{cases}
+\end{equation}
+La classe positiva ($y=1$) identifica gli individui con reddito superiore alla soglia, costituendo il target di interesse per la predizione.
+
+\subsection{Strategia di Partitioning (Stratified Hold-out)}
+
+Il dataset processato ($N=30.139$) è stato suddiviso in due sottoinsiemi disgiunti secondo un rapporto 80/20:
+\begin{itemize}
+    \item \textbf{Training Set ($S_{train}$):} 80\% dei dati ($n_{train} = 24.111$), utilizzato per la stima dei parametri del modello.
+    \item \textbf{Test Set ($S_{test}$):} 20\% dei dati ($n_{test} = 6.028$), riservato esclusivamente per la valutazione delle performance su dati non osservati (\textit{unseen data}).
+\end{itemize}
+
+Per garantire la riproducibilità dell'esperimento, è stato fissato un \textit{seed} globale (\texttt{random\_state=42}).
+
+\subsection{Campionamento Stratificato}
+Dato il moderato sbilanciamento delle classi nel dataset originale (tasso di positività $\approx 24.9\%$), un campionamento casuale semplice (\textit{Simple Random Sampling}) avrebbe potuto introdurre bias campionari, alterando le probabilità a priori delle classi nei due sottoinsiemi.
+
+\noindent
+È stato pertanto adottato lo \textbf{Stratified Sampling}, vincolando lo split a preservare la proporzione originale delle classi:
+\begin{equation}
+    P(y=1 | S_{train}) \approx P(y=1 | S_{test}) \approx P(y=1 | S_{total})
+\end{equation}
+
+\noindent
+La verifica a posteriori (Tabella \ref{tab:split_verify}) conferma l'efficacia della stratificazione, con una divergenza ($\Delta$) tra le distribuzioni del Training e del Test set inferiore allo $0.01\%$, garantendo che la valutazione sul test set sia rappresentativa della distribuzione reale.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{lccc}
+\toprule
+\textbf{Classe} & \textbf{Training Set \%} & \textbf{Test Set \%} & \textbf{Delta ($\Delta$)} \\
+\midrule
+0 ($\le$50K) & 75.0944\% & 75.0995\% & 0.0052\% \\
+1 ($>$50K) & 24.9056\% & 24.9005\% & 0.0052\% \\
+\bottomrule
+\end{tabular}
+\caption{Verifica della distribuzione delle classi post-split.}
+\label{tab:split_verify}
+\end{table}

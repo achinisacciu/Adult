@@ -1,0 +1,89 @@
+% Reset dei contatori per l'appendice
+\setcounter{figure}{0}
+\renewcommand{\thefigure}{A.\arabic{figure}}
+\setcounter{table}{0}
+\renewcommand{\thetable}{A.\arabic{table}}
+
+\section{Benchmark Algoritmico e Model Selection}
+\label{app:model_benchmark}
+
+Questa sezione descrive la metodologia adottata per la selezione dell'architettura predittiva ottimale. L'approccio segue un processo a due stadi: uno \textit{screening} massivo \textbf{Model Zoo Benchmark} volto a identificare le famiglie di algoritmi più promettenti, seguito da un raffinamento mirato \textbf{Hyperparameter Tuning}.
+
+\subsection{Configurazione dello Spazio Algoritmico}
+
+È stato definito un pool eterogeneo di classificatori ($\mathcal{M}_{zoo}$), spaziando da modelli lineari a metodi di ensemble avanzati, al fine di valutare diversi bias induttivi. Per ogni algoritmo, è stata definita una pipeline di preprocessing specifica per soddisfare le assunzioni teoriche del modello (e.g., normalizzazione per metodi basati su distanze euclidee o discesa del gradiente).
+
+La configurazione sperimentale comprende:
+
+\begin{itemize}
+    \item \textbf{Modelli Lineari e SVM:} \texttt{LogisticRegression}, \texttt{LinearSVC}, \texttt{SGDClassifier}. Sensibili alla scala delle feature, accoppiati con \texttt{StandardScaler}.
+    \item \textbf{Metodi Basati su Distanze:} \texttt{KNeighborsClassifier} ($k=5$), \texttt{NearestCentroid}. Richiedono standardizzazione rigorosa.
+    \item \textbf{Metodi Probabilistici:} \texttt{GaussianNB}, \texttt{BernoulliNB}, \texttt{LDA}, \texttt{QDA}.
+    \item \textbf{Alberi e Ensemble (Scale-Invariant):}
+    \begin{itemize}
+        \item \textit{Bagging:} \texttt{RandomForest}, \texttt{ExtraTrees}.
+        \item \textit{Boosting:} \texttt{AdaBoost}, \texttt{GradientBoosting}.
+        \item \textit{State-of-the-Art (SOTA) Gradient Boosting:} \texttt{XGBoost}, \texttt{LightGBM}, \texttt{CatBoost}, \texttt{HistGradientBoosting}. Questi modelli gestiscono nativamente feature non scalate e valori mancanti.
+    \end{itemize}
+\end{itemize}
+
+\subsection{Protocollo di Valutazione (Stratified Cross-Validation)}
+
+La stima delle performance di generalizzazione è stata condotta mediante una procedura di \textbf{Stratified K-Fold Cross-Validation} con $K=5$.
+Questo metodo partiziona il training set $S_{train}$ in 5 sottoinsiemi disgiunti $\{F_1, \dots, F_5\}$, preservando in ciascuno la proporzione delle classi target. Per ogni iterazione $k \in \{1, \dots, 5\}$, il modello viene addestrato su $S_{train} \setminus F_k$ e validato su $F_k$.
+
+\noindent
+La metrica obiettivo selezionata è l'\textbf{F1-Score} (media armonica tra Precision e Recall), preferita all'Accuracy globale in virtù dello sbilanciamento delle classi, in quanto penalizza i modelli che massimizzano i soli True Negatives (classe maggioritaria).
+
+\begin{equation}
+    F1 = 2 \cdot \frac{\text{Precision} \cdot \text{Recall}}{\text{Precision} + \text{Recall}}
+\end{equation}
+
+\subsection{Risultati del Benchmark Comparativo}
+
+I risultati sperimentali (Tabella \ref{tab:full_benchmark}) combinano la fase di screening base e il successivo tuning, evidenziando una netta superiorità delle architetture basate su Gradient Boosting rispetto ai modelli lineari e probabilistici.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{llcc}
+\toprule
+\textbf{Model} & \textbf{Scaler} & \textbf{Time} & \textbf{F1 Score (Mean)} \\
+\midrule
+Ridge Classifier & StandardScaler & 9.95s & 0.6033 (\(\pm\) 0.0075) \\
+SGD Classifier & StandardScaler & 9.29s & 0.6351 (\(\pm\) 0.0238) \\
+Passive Aggressive & StandardScaler & 0.93s & 0.5492 (\(\pm\) 0.0498) \\
+Linear SVC & StandardScaler & 2.54s & 0.6567 (\(\pm\) 0.0042) \\
+KNN (5) & StandardScaler & 3.35s & 0.6143 (\(\pm\) 0.0105) \\
+Nearest Centroid & StandardScaler & 0.61s & 0.6347 (\(\pm\) 0.0075) \\
+Gaussian NB & StandardScaler & 0.68s & 0.5359 (\(\pm\) 0.0097) \\
+Bernoulli NB & StandardScaler & 0.64s & 0.6364 (\(\pm\) 0.0050) \\
+LDA & StandardScaler & 1.52s & 0.6307 (\(\pm\) 0.0088) \\
+QDA & StandardScaler & 1.84s & 0.5956 (\(\pm\) 0.0039) \\
+Decision Tree & None & 1.27s & 0.6156 (\(\pm\) 0.0098) \\
+Extra Tree & None & 0.43s & 0.5764 (\(\pm\) 0.0116) \\
+Random Forest & None & 8.42s & 0.6557 (\(\pm\) 0.0065) \\
+Extra Trees & None & 9.94s & 0.6259 (\(\pm\) 0.0064) \\
+AdaBoost & None & 5.26s & 0.6498 (\(\pm\) 0.0034) \\
+Gradient Boosting & None & 14.30s & 0.6851 (\(\pm\) 0.0055) \\
+Hist Gradient Boosting & None & 11.23s & 0.7154 (\(\pm\) 0.0022) \\
+XGBoost & None & 3.01s & 0.7156 (\(\pm\) 0.0035) \\
+LightGBM & None & 3.72s & 0.7156 (\(\pm\) 0.0063) \\
+CatBoost & None & 49.17s & nan (\(\pm\) nan) \\
+\bottomrule
+\end{tabular}
+\caption{Risultati completi dei modelli con Scaler applicato, tempi di esecuzione e F1 Score medio.}
+\label{tab:full_benchmark}
+\end{table}
+
+
+
+
+\subsection{Analisi dei Risultati}
+\begin{enumerate}
+    \item \textbf{Supremazia del Boosting:} I migliori classificatori appartengono alla famiglia del Gradient Boosting su alberi decisionali. \texttt{XGBoost} e \texttt{LightGBM} si posizionano al vertice della classifica con un F1-Score medio in CV pari a 0.7156, affiancati dall'Hist Gradient Boosting (0.7154) e seguiti dal Gradient Boosting classico (0.6851). Questa famiglia di algoritmi distacca nettamente le SVM e i metodi probabilistici.
+    \item \textbf{Efficienza Computazionale:} L'analisi dei tempi di esecuzione evidenzia una forte variabilità. Modelli molto performanti come il Gradient Boosting (14.30s) e l'Hist Gradient Boosting (11.23s) richiedono tempi di addestramento elevati, fino ad arrivare alle tempistiche fuori scala del CatBoost (49.17s). Al contrario, \texttt{XGBoost} (3.01s) e \texttt{LightGBM} (3.72s), insieme ad \texttt{AdaBoost} (5.26s), \texttt{Linear SVC} (2.54s) e \texttt{Bernoulli NB} (0.64s), rispettano un rigoroso criterio di efficienza (es. \(\le 6.0\)s), offrendo il miglior compromesso tra potere predittivo e velocità.
+    \item \textbf{Stabilità:} I modelli di vertice presentano una deviazione standard molto contenuta durante la Cross-Validation. Ad esempio, XGBoost registra un \(\sigma = 0.0035\), mentre l'Hist Gradient Boosting segna un eccellente \(\sigma = 0.0022\), indicando una robustezza strutturale notevole rispetto alle variazioni nel campionamento dei fold.
+\end{enumerate}
+
+\noindent
+Sulla base di questo screening iniziale, tenendo conto del bilanciamento ottimale tra le metriche di performance (F1-Score) e l'efficienza computazionale richiesta, \textbf{XGBoost}, \textbf{LightGBM}, \textbf{Linear SVC}, \textbf{AdaBoost} e \textbf{Bernoulli NB} sono stati selezionati come candidati per passare alla successiva fase di ottimizzazione degli iperparametri.

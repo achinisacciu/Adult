@@ -1,0 +1,502 @@
+\documentclass[a4paper,11pt]{article}
+\usepackage{fix-cm}
+% --- IMPOSTAZIONI LINGUA E CODIFICA ---
+\usepackage[english]{babel}
+%\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+% --- FONT ARIAL (Helvetica) ---
+\usepackage[scaled]{helvet}
+\renewcommand{\familydefault}{\sfdefault}
+
+% --- PACCHETTI UTILI ---
+\usepackage{lastpage}
+\usepackage{amsmath, amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{float}
+\usepackage{subcaption}
+\usepackage{geometry}
+\usepackage{fancyhdr}
+\setlength{\headheight}{13.6pt}
+\usepackage{lastpage}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usepackage{adjustbox}
+\usetikzlibrary{matrix, positioning, shapes.geometric, arrows.meta, fit, backgrounds, calc, shadows}
+\usepackage{appendix}
+
+%\usepackage[title,titletoc]{APPENDICE}
+
+% Comando per cambiare lo stile nelle appendici
+\newcommand{\setupappendixstyle}{
+    \newpage
+    \pagestyle{fancy}
+    \fancyhf{} % Pulisce header e footer precedenti
+    
+    % Configurazione Header Dinamico: solo "Appendice" + Lettera
+    \fancyhead[L]{\textbf{\small APPENDICE \thesection}} 
+    \fancyhead[R]{\small \textit{Documentazione Integrativa}}
+    
+    % Footer (manteniamo la numerazione pagine)
+    \fancyfoot[C]{\textcolor{BrandGrayMid}{\small Pagina \thepage\ di \pageref{LastPage}}}
+    
+    % Reset contatori per Figure e Tabelle (es. A.1, B.1)
+    \renewcommand{\thefigure}{\thesection.\arabic{figure}}
+    \renewcommand{\thetable}{\thesection.\arabic{table}}
+}
+
+
+\tikzset{
+  flow/node/.style={
+    font=\small,
+    align=center,
+    rounded corners=3pt,
+    draw=BrandGrayDark,
+    line width=0.6pt,
+    text=BrandTextPrimary,
+    fill=SideBarColor,
+    minimum height=9mm,
+    text width=4.2cm,
+    drop shadow={shadow xshift=0.8pt, shadow yshift=-0.8pt, opacity=0.18}
+  },
+  flow/startstop/.style={
+    flow/node,
+    fill=BrandPaper,
+    draw=BrandAccentRed,
+    line width=0.8pt,
+    text width=4.2cm
+  },
+  flow/process/.style={
+    flow/node
+  },
+  flow/data/.style={
+    flow/node,
+    fill=BrandPaper
+  },
+  flow/decision/.style={
+    font=\small,
+    align=center,
+    diamond,
+    aspect=2.2,
+    inner sep=1.2pt,
+    draw=BrandAccentRed,
+    line width=0.8pt,
+    text=BrandTextPrimary,
+    fill=BrandPaper,
+    drop shadow={shadow xshift=0.8pt, shadow yshift=-0.8pt, opacity=0.18}
+  },
+  flow/arrow/.style={
+    -{Latex[length=2.2mm,width=1.6mm]},
+    line width=0.7pt,
+    draw=BrandAccentRed
+  },
+  flow/label/.style={
+    font=\scriptsize,
+    text=BrandGrayDark,
+    fill=white,
+    fill opacity=0.85,
+    text opacity=1,
+    inner sep=1.2pt,
+    rounded corners=2pt
+  }
+}
+
+
+\geometry{margin=2.5cm, headsep=0.8cm, footskip=1cm}
+
+% --- COLORI DEL NOTEBOOK (Design System) ---
+\definecolor{BrandTextPrimary}{HTML}{111111}
+\definecolor{BrandAccentRed}{HTML}{222255}
+\definecolor{BrandGrayDark}{HTML}{404040}
+\definecolor{BrandGrayMid}{HTML}{737373}
+\definecolor{BrandPaper}{HTML}{E8E8E6}
+\definecolor{SideBarColor}{HTML}{F5F5F5} % Colore sfondo laterale
+
+% --- HEADER E FOOTER (Pagine interne) ---
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\textbf{\small Andrea Palazzo - Analytics • Intelligence • Strategy}}
+\fancyhead[R]{\small \textit{Analisi Predittiva Income}}
+\fancyfoot[C]{\textcolor{BrandGrayMid}{\small Pagina \thepage\ di \pageref{LastPage}}}
+\renewcommand{\headrulewidth}{0.5pt}
+\renewcommand{\headrule}{\color{BrandAccentRed}\hrule width\headwidth height\headrulewidth \kern-\headrulewidth}
+
+% --- CONFIGURAZIONE DOCUMENTO ---
+\hypersetup{
+    colorlinks=true,
+    linkcolor=BrandAccentRed,
+    urlcolor=BrandAccentRed,
+    pdftitle={Analisi e Predizione del Reddito Adult Census Income},
+    pdfauthor={Andrea Palazzo}
+}
+
+\begin{document}
+
+% --- TITLE PAGE CORPORATE ---
+\begin{titlepage}
+    \pagestyle{empty} % Nessun header/footer nella copertina
+    \begin{tikzpicture}[remember picture, overlay]
+        
+        % 1. Fascia laterale sinistra (Grigio chiaro)
+        \fill[SideBarColor] (current page.north west) rectangle ($(current page.south west) + (6cm, 0)$);
+        
+        % 2. Linea accento verticale (Rosso brand)
+        \fill[BrandAccentRed] ($(current page.north west) + (6cm, 0)$) rectangle ($(current page.south west) + (6.15cm, 0)$);
+        
+        % 3. LOGO (Sostituisci 'logo.png' con il nome del tuo file)
+        % Posizionato in alto a sinistra nella fascia laterale
+        \node[anchor=north west, inner sep=0] at ($(current page.north west) + (1cm, -1.5cm)$) {
+            % Se non hai il file, decommenta la riga sotto per vedere un placeholder
+            \includegraphics[width=4cm]{figure_vecchie/logo.png} 
+            
+            % Placeholder temporaneo se non hai il PNG pronto (puoi rimuoverlo)
+            %\begin{tikzpicture}
+            %   \node[fill=white, draw=BrandGrayDark, text width=3.5cm, align=center, % minimum height=3.5cm] 
+            %   {\Huge\bfseries\color{BrandAccentRed}$\alpha$};
+            %\end{tikzpicture}
+        };
+
+        % 4. Info Autore nella fascia laterale (in basso)
+        \node[anchor=south west, align=left, text width=4.5cm] at ($(current page.south west) + (1cm, 2cm)$) {
+            \color{BrandGrayDark}
+            \small \textbf{}\\[0.1cm]
+            \Large \textbf{Andrea Palazzo}\\[0.1cm]
+            \small Data Manager Student
+            \vspace{0.5cm}
+            
+            \small \textbf{}\\[0.1cm]
+            %\today
+            \vspace{0.5cm}
+            
+           
+        };
+
+        % 5. Area Titolo (Parte destra bianca)
+        \node[anchor=north west, align=left, text width=12cm] at ($(current page.north west) + (7.5cm, -6cm)$) {
+            \color{BrandAccentRed}\sffamily\bfseries\small REPORT TECNICO
+            \vspace{0.3cm}
+            
+            \color{BrandTextPrimary}\sffamily\bfseries\fontsize{35}{40}\selectfont
+            Analisi e Predizione\\
+            del Reddito
+            \vspace{0.5cm}
+            
+            \color{BrandGrayDark}\sffamily\huge\textit{Adult Census Income Dataset}
+            \vspace{1.5cm}
+            
+            \color{BrandGrayMid}\normalsize
+            Studio applicativo di machine learning su dati censuari per la previsione del reddito.
+        };
+
+        % 6. Elemento grafico decorativo in basso a destra
+        \node[anchor=south east] at ($(current page.south east) + (-1cm, 1cm)$) {
+             \fontsize{60}{70}\selectfont\color{BrandPaper}\textbf{BI}
+        };
+
+    \end{tikzpicture}
+\end{titlepage}
+
+\newpage
+\pagestyle{fancy}
+
+
+%=====================================================================================================
+%=====================================================================================================
+% abstract
+%=====================================================================================================
+\begin{abstract}
+\noindent Questo lavoro affronta un problema di classificazione binaria sul dataset \textit{Adult Census Income}, con l’obiettivo di predire se il reddito annuale di un individuo superi la soglia dei 50.000 dollari.
+L’analisi evidenzia un marcato sbilanciamento di classe e la presenza di valori mancanti codificati come \texttt{?}, gestiti tramite conversione e rimozione delle osservazioni incomplete; inoltre, la variabile \texttt{fnlwgt} viene esclusa per il ridotto potere discriminante e la variabile \texttt{native.country} viene ricondotta a una codifica più robusta a bassa cardinalità.
+Dopo una fase di esplorazione e definizione della pipeline di preprocessing, vengono confrontati diversi algoritmi supervisionati mediante validazione incrociata, selezionando i modelli di gradient boosting come candidati principali per l’ottimizzazione degli iperparametri.
+Il modello finale, un XGBoost ottimizzato, ottiene sul test set indipendente un’accuracy pari a 0.8540 e un F1-score pari a 0.7330, con ROC-AUC pari a 0.931, confermando buone capacità di generalizzazione e un compromesso efficace tra precision e recall in presenza di classi sbilanciate.
+\end{abstract}
+
+\newpage
+\tableofcontents
+\newpage
+
+
+%=====================================================================================================
+%=====================================================================================================
+% corpo del documento
+%=====================================================================================================
+
+
+
+
+
+
+
+\section{Introduzione}
+
+Il dataset \textit{Adult Census Income} rappresenta un benchmark consolidato nel machine learning per lo studio di problemi di classificazione binaria su dati tabellari eterogenei. 
+L’obiettivo di questo lavoro è la previsione del reddito individuale, formalizzata come la classificazione della variabile target \texttt{income} rispetto al superamento o meno della soglia annuale di 50.000 dollari. 
+Il contesto applicativo presenta complessità tipiche degli scenari reali, tra cui la coesistenza di variabili categoriche e numeriche e lo sbilanciamento tra le classi della variabile target. 
+
+\subsection{Obiettivo e impostazione del problema}
+Il progetto mira a costruire un flusso di lavoro completo e riproducibile che includa analisi esplorativa, pulizia dei dati, preprocessing, feature engineering e valutazione comparativa di modelli supervisionati. 
+In presenza di classi sbilanciate, l’analisi pone particolare attenzione alla scelta di metriche di valutazione robuste e all’interpretazione degli errori di classificazione sulla classe minoritaria. 
+L’output atteso è un modello finale con buone capacità di generalizzazione, valutato su un insieme di test indipendente e discusso anche attraverso analisi diagnostiche e strumenti di interpretabilità. 
+
+\subsection{Sfide principali}
+L’analisi del dataset evidenzia che eventuali valori mancanti possono essere codificati in forma non standard (ad esempio tramite il placeholder \texttt{?}), rendendo necessarie procedure esplicite di individuazione e trattamento. 
+Inoltre, lo sbilanciamento della variabile target implica che metriche come la sola accuracy possano fornire una rappresentazione incompleta delle prestazioni, richiedendo un’analisi centrata anche su precision, recall, F1-score e curve di valutazione appropriate. 
+Infine, la presenza di variabili ad alta cardinalità e la natura mista delle feature (categoriche e numeriche) richiedono scelte metodologiche coerenti nella progettazione della pipeline di preprocessing. 
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{fc_p.pdf}
+    \caption{Pipeline metodologica del progetto. Il diagramma illustra il flusso di lavoro completo, partendo dalla fase di Analisi Esplorativa dei Dati (EDA) e Preprocessing, passando per la Feature Engineering e selezione delle variabili, fino all'addestramento, validazione e definizione del modello di Machine Learning finale.}
+    \label{fig:ml_pipeline}
+\end{figure}
+
+
+\newpage
+\section{Storia e Origine del Dataset}
+
+I dati originali provengono dal database del censimento degli Stati Uniti del 1994. L'estrazione fu curata da Barry Becker in collaborazione con Ronny Kohavi (all'epoca presso la Data Mining and Visualization di Silicon Graphics) e donata all'\textit{UCI Machine Learning Repository} il 30 aprile 1996.
+
+\subsection{Criteri di Costruzione e Filtraggio del Dataset}
+
+Un aspetto cruciale per comprendere la struttura attuale del dataset riguarda i criteri di filtraggio utilizzati dagli autori originali. Per ottenere dati coerenti e utilizzabili a fini di analisi, Becker e Kohavi applicarono delle query specifiche al database grezzo. Tali criteri spiegano l'origine delle attuali variabili e la selezione delle osservazioni presenti nel dataset finale:
+
+\begin{itemize}
+\item \textbf{AAGE > 16}: Esclusione dei minorenni; nel dataset finale questa informazione è rappresentata dalla variabile {age}.
+\item \textbf{HRSWK > 0}: Esclusione degli individui non occupati; corrisponde alla variabile {hours-per-week}.
+\item \textbf{AFNLWGT > 1}: \textit{Final weight}, peso statistico utilizzato dal Census Bureau per garantire la rappresentatività del campione; corrisponde alla variabile {fnlwgt}.
+\item \textbf{AGI > 100}: \textit{Adjusted Gross Income}, utilizzato per filtrare redditi non significativi e per la costruzione della variabile target.
+\end{itemize}
+
+\noindent
+Il risultato di questo processo è un dataset composto da 48.842 osservazioni e 14 variabili esplicative, comprendenti attributi demografici, educativi e occupazionali.
+
+\newpage
+\section{Ambiente di Sviluppo e Strumenti}
+
+L'analisi è stata condotta utilizzando il linguaggio Python (versione 3.13.2) all'interno di un ambiente Jupyter Notebook. Al fine di garantire la riproducibilità dell'analisi e l'efficienza computazionale, sono state adottate librerie consolidate nell'ecosistema della data science, ciascuna con un ruolo specifico all'interno del flusso di lavoro:
+
+\begin{itemize}
+    \item \textbf{Data Manipulation:} {pandas} e {numpy} per la gestione strutturata dei dati e le operazioni vettoriali.
+    \item \textbf{Visualizzazione:} {matplotlib} e {seaborn} per la produzione di grafici statici ad alta risoluzione, integrati da {plotly} per l'esplorazione interattiva dei dati.
+    \item \textbf{Machine Learning:} Il framework {scikit-learn} ha fornito la base per le fasi di preprocessing, modellazione e valutazione delle prestazioni.
+    \item \textbf{Gradient Boosting Avanzato:} Sono state integrate librerie specializzate quali {XGBoost}, {LightGBM} e {CatBoost} per il confronto di algoritmi allo stato dell’arte su dati tabellari.
+\end{itemize}
+
+\newpage
+\section{Descrizione del Dataset}
+
+\subsection{Origine e Acquisizione dei Dati}
+L'analisi è stata condotta sul dataset \textit{Adult Census Income}, acquisito tramite il repository ufficiale UCI Machine Learning Repository (tramite KaggleHub). Si precisa che il dataset utilizzato non corrisponde esattamente alla versione grezza del censimento del 1994, ma a una versione preprocessata e consolidata resa disponibile dal repository UCI.
+
+\subsection{Struttura e Tipologia delle Variabili}
+Il dataset presenta una struttura eterogenea, composta da variabili sia categoriche che numeriche. In particolare:
+\begin{itemize}
+    \item \textbf{Variabili Categoriche (8):} {workclass}, {education}, {marital.status}, {occupation}, {relationship}, {race}, {sex} e {native.country}.
+    \item \textbf{Variabili Numeriche (6):} {age}, {fnlwgt}, {education.num}, {capital.gain}, {capital.loss} e {hours.per.week}.
+\end{itemize}
+
+\noindent Il dataset contiene inizialmente 32.561 osservazioni, ciascuna descritta da 14 variabili esplicative, oltre la variabile target {income} di tipo categorico binario e indica se il reddito annuale dell’individuo supera o meno la soglia dei 50.000 dollari.
+\noindent
+Le caratteristiche strutturali e la distribuzione delle variabili verranno analizzate in dettaglio nella successiva fase di analisi esplorativa dei dati.
+
+
+\newpage
+\newpage
+\section{Analisi Esplorativa dei Dati (EDA)}
+
+L'analisi si è concentrata su:
+\begin{enumerate}[label=(\roman*)]
+    \item distribuzione della variabile target e sbilanciamento;
+    \item presenza e struttura dei valori mancanti;
+    \item evidenze preliminari di separabilità tra classi tramite feature categoriche e numeriche;
+    \item verifica di possibili fenomeni di multicollinearità sulle variabili numeriche.
+\end{enumerate}
+
+\subsubsection{Distribuzione della variabile target e sbilanciamento}
+La variabile target \texttt{income} presenta una distribuzione fortemente asimmetrica, con una classe maggioritaria (\(\leq 50K\)) pari a circa il 76\% delle osservazioni e una classe minoritaria (\(>50K\)) pari a circa il 24\%. 
+Questo rapporto (circa 3:1) configura un tipico scenario di \textit{imbalanced classification}, in cui l’accuracy può risultare fuorviante se utilizzata come unico indicatore di performance. 
+Di conseguenza, nelle fasi successive vengono privilegiate metriche robuste allo sbilanciamento (ad es.\ Precision, Recall, F1-score e ROC-AUC) e viene posta attenzione specifica alla capacità di riconoscere correttamente la classe minoritaria. 
+
+\subsection{Valori mancanti e pattern di mancanza}
+Un primo controllo visivo non evidenzia valori nulli, ma un’analisi più approfondita mostra che i dati mancanti sono codificati tramite il placeholder \texttt{?} anziché come \texttt{NaN}. 
+Dopo la conversione del placeholder, i missing risultano concentrati soprattutto in \texttt{occupation} (circa 5.66\%), \texttt{workclass} (circa 5.64\%) e \texttt{native.country} (circa 1.79\%). 
+L’EDA evidenzia inoltre un pattern strutturale di mancanza congiunta tra \texttt{workclass} e \texttt{occupation}; data la difficoltà di imputare valori plausibili senza introdurre distorsioni, si è deciso di rimuovere le osservazioni incomplete (\textit{listwise deletion}), con una riduzione complessiva di circa il 7.44\% del dataset. 
+
+\subsection{Evidenze preliminari sulle feature}
+Le analisi descrittive sulle variabili categoriche mostrano relazioni informative con il target per variabili socio-demografiche e lavorative (ad es.\ \texttt{education}, \texttt{marital.status}, \texttt{occupation}, \texttt{relationship}), suggerendo che tali attributi contribuiscano alla separazione tra classi. 
+Per la variabile \texttt{sex} emerge un gap marcato: la probabilità di reddito \(>50K\) risulta sensibilmente più alta per gli uomini rispetto alle donne nel campione osservato. 
+Per le variabili numeriche, l’analisi evidenzia che \texttt{age}, \texttt{education.num} e \texttt{hours.per.week} tendono ad assumere valori più elevati nella classe \(>50K\), mentre \texttt{capital.gain} e \texttt{capital.loss} presentano una forte \textit{zero-inflation} (molti zeri e pochi valori estremi), indicando eventi rari ma potenzialmente molto informativi quando presenti. 
+La variabile \texttt{fnlwgt} mostra invece distribuzioni molto simili tra le due classi, suggerendo un potere discriminante limitato e motivando una successiva valutazione critica del suo utilizzo nel modello. 
+
+\subsection{Correlazioni e multicollinearità}
+Come verifica finale dell’EDA, è stata calcolata la matrice di correlazione di Pearson per le variabili numeriche, con l’obiettivo di identificare eventuali relazioni lineari forti e ridondanze informative. 
+Dalla matrice non emergono coppie con correlazione elevata oltre le soglie tipicamente considerate critiche (ad es.\ \(r>0.85\)), suggerendo l’assenza di multicollinearità severa tra le feature numeriche. 
+Nel complesso, le evidenze dell’EDA guidano le decisioni di preprocessing (gestione missing, trasformazioni e codifiche) e anticipano le feature più promettenti per la fase di modellazione e selezione del modello. 
+
+\newpage
+\section{Feature Selection e Inferenza Statistica}
+
+Dopo la fase di EDA, è stata condotta una fase di inferenza statistica con l’obiettivo di validare quantitativamente le evidenze descrittive e selezionare le feature più informative rispetto alla variabile target (\(\leq 50K\) vs \(>50K\)). 
+A differenza dell’EDA, che fornisce indicazioni qualitative e visuali, questa fase si basa su test formali di ipotesi affiancati da misure di \textit{effect size}, così da distinguere tra semplice significatività statistica e reale rilevanza predittiva. 
+
+\subsection{Criteri decisionali e soglie operative}
+La selezione delle feature è stata guidata da soglie definite \textit{a priori} per rendere il processo riproducibile. In particolare:
+
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Gestione dei valori mancanti:} le variabili con una quota di \textit{missing} elevata vengono segnalate come critiche (soglia operativa 10\%);
+    \item \textbf{Analisi della varianza:} le \textit{feature} a varianza nulla (costanti) sono candidate alla rimozione immediata;
+    \item \textbf{Monitoraggio della ridondanza:} per le \textit{feature} numeriche viene verificata la multicollinearità tramite la matrice di correlazione (soglia di attenzione tipica $r > 0.85$);
+    \item \textbf{Valutazione della significatività:} poiché in dataset numerosi i $p$-value tendono a essere sempre significativi, la decisione viene guidata dalla grandezza dell'effetto (Cramér's $V$ per le variabili categoriche e Cohen's $d$ per quelle numeriche).
+\end{enumerate}
+
+
+\subsection{Variabili categoriche: test \(\chi^2\) e Cramér’s V}
+Per ogni feature categorica è stato applicato un test \(\chi^2\) di indipendenza tra feature e target (H0: indipendenza; H1: associazione). 
+Alla significatività è stata affiancata la misura di associazione Cramér’s V, così da quantificare l’intensità della relazione. 
+I risultati mostrano che \texttt{relationship} e \texttt{marital.status} sono le variabili con associazione più elevata (Cramér’s V circa 0.45), seguite da \texttt{education} (circa 0.37) e \texttt{occupation} (circa 0.35), mentre \texttt{race} e \texttt{native.country} risultano statisticamente significative ma con effect size debole (circa 0.10). 
+
+\subsection{Variabili numeriche: Mann--Whitney U e Cohen’s \(d\)}
+Dato che l’EDA evidenzia distribuzioni non gaussiane e forte asimmetria per alcune variabili, è stato adottato un test non parametrico di Mann--Whitney U per confrontare le distribuzioni tra le due classi. 
+Come misura standardizzata della separazione tra gruppi è stato calcolato Cohen’s \(d\), utile per ordinare le feature in base alla capacità discriminante. 
+Tra le variabili numeriche, \texttt{education.num} emerge come la più discriminante (Cohen’s \(d\) circa 0.83), seguita da \texttt{age} e \texttt{hours.per.week} (entrambe circa 0.55), mentre \texttt{fnlwgt} risulta non informativa (p-value circa 0.053 e \(d\) circa 0.02), motivandone l’esclusione. 
+
+\subsection{Output della selezione}
+Combinando significatività statistica ed effect size, le feature prioritarie identificate includono \texttt{age}, \texttt{education.num}, \texttt{hours.per.week} e, tra le categoriche, \texttt{relationship}, \texttt{marital.status} e \texttt{occupation}. 
+Le variabili con contributo potenzialmente utile ma da validare in modellazione includono \texttt{sex}, \texttt{workclass}, \texttt{capital.gain} e \texttt{capital.loss}, anche in considerazione della forte asimmetria e della natura “evento raro” delle ultime due. 
+La variabile \texttt{fnlwgt}, priva di potere discriminante, viene candidata alla rimozione per ridurre dimensionalità senza perdita informativa rilevante. 
+
+\newpage
+\section{Partizionamento dei Dati e Trasformazione delle Feature}
+
+Prima dell'addestramento è stata definita una procedura standardizzata per:
+
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Preparazione del target:} codifica della variabile dipendente in formato binario ($0$ e $1$) per i classificatori;
+    \item \textbf{Trasformazione delle feature:} conversione delle variabili categoriche e numeriche in un formato adatto ai modelli supervisionati (tramite \textit{encoding} e \textit{scaling});
+    \item \textbf{Data splitting:} suddivisione del dataset in \textit{training} e \textit{test set} per stimare correttamente la capacità di generalizzazione del modello su dati non visti.
+\end{enumerate}
+
+
+\subsection{Preparazione del target}
+La variabile target \texttt{income}, inizialmente rappresentata come stringa, è stata ripulita da eventuali spazi e successivamente codificata in forma binaria. 
+È stata adottata la mappatura \(0 \rightarrow \leq 50K\) e \(1 \rightarrow >50K\), seguita da un controllo di qualità per verificare l’assenza di valori non mappati. 
+
+\subsection{Trasformazione delle feature}
+Sulla base delle evidenze emerse nelle fasi precedenti, è stata effettuata una riduzione della dimensionalità rimuovendo la variabile \texttt{fnlwgt} (\textit{Final Weight}), in quanto interpretabile come peso campionario amministrativo e con potere discriminante trascurabile rispetto al target. 
+Per mitigare i problemi legati all’alta cardinalità, è stata inoltre trasformata la variabile \texttt{native.country} (inizialmente con molte categorie) in una rappresentazione più robusta, aggregando le modalità in due macro-categorie: \texttt{USA} e \texttt{Other}. 
+Questa scelta riduce la frammentazione informativa e limita il rischio di pattern spurii su categorie rare, mantenendo al contempo un’informazione geografica essenziale e gestibile in fase di modellazione. 
+
+\subsection{Strategia di split e riproducibilità}
+Il dataset risultante è stato suddiviso in Training set e Test set con una ripartizione 80/20, utilizzando campionamento stratificato sulla variabile target per preservare la proporzione tra classi nei due sottoinsiemi. 
+Per garantire riproducibilità sperimentale, lo split è stato eseguito fissando \texttt{random\_state = 42}. 
+Nell’impostazione riportata, il training set è composto da 24.111 osservazioni ed è impiegato per addestramento e validazione, mentre il test set è composto da 6.028 osservazioni ed è mantenuto isolato per la valutazione finale. 
+
+
+\newpage
+\section{Modellazione e Benchmark dei Modelli}
+
+Una volta completate le fasi di preprocessing e feature engineering, è stata avviata una procedura di modellazione supervisionata finalizzata a confrontare algoritmi eterogenei e selezionare i candidati più promettenti per l’ottimizzazione. 
+
+\subsection{Protocollo di valutazione}
+Il confronto tra i modelli è stato condotto tramite validazione incrociata stratificata (\textit{k}-fold), preservando la distribuzione sbilanciata della variabile target nei vari fold. 
+La metrica di riferimento primaria è stata l’F1-score, scelta per il suo equilibrio tra precision e recall in problemi di classificazione binaria con classi sbilanciate. 
+Oltre alla performance predittiva, sono stati monitorati anche i tempi di addestramento, così da valutare il compromesso tra qualità e costo computazionale. 
+
+\subsection{Screening iniziale dei modelli}
+Sono stati valutati modelli appartenenti a diverse famiglie (lineari, metodi basati su distanza/probabilità, alberi ed ensemble, boosting classico/moderno e reti neurali), con l’obiettivo di ottenere un primo ranking comparativo. 
+Il benchmark ha evidenziato una superiorità dei modelli di boosting, in particolare quelli basati su gradient boosting moderno. 
+I migliori risultati medi di F1-score in cross-validation sono stati ottenuti da \texttt{LightGBM}, \texttt{CatBoost}, \texttt{Hist Gradient Boosting}, \texttt{XGBoost} e \texttt{Gradient Boosting}, con valori compresi tra 0.68 e 0.72. 
+Sulla base di queste evidenze, tali modelli sono stati selezionati come candidati per la fase di ottimizzazione degli iperparametri. 
+
+\newpage
+\section{Ottimizzazione degli Iperparametri e Selezione del Modello Finale}
+
+\subsection{Strategia di ottimizzazione}
+Per ciascun modello candidato è stata condotta un’ottimizzazione degli iperparametri tramite \textit{Randomized Search}, così da esplorare in modo efficiente lo spazio dei parametri evitando il costo di una ricerca esaustiva. 
+La funzione obiettivo è rimasta l’F1-score medio in cross-validation, garantendo coerenza metodologica con la fase di benchmark. 
+
+\subsection{Risultati del tuning e scelta del candidato}
+L’ottimizzazione ha prodotto miglioramenti marginali ma consistenti rispetto alle versioni base. 
+In particolare, \texttt{LightGBM (Tuned)} ha raggiunto la miglior performance complessiva con un F1-score medio pari a 0.718, mentre \texttt{Hist Gradient Boosting (Tuned)} e \texttt{XGBoost (Tuned)} hanno ottenuto risultati molto simili (F1 $\approx 0.716$). 
+Alla luce del ranking in cross-validation, \texttt{LightGBM (Tuned)} è stato selezionato come modello finale candidato alla valutazione su test set indipendente. 
+
+\subsection{Valutazione sul test set (hold-out)}
+Il modello selezionato è stato valutato su un test set indipendente, ottenendo: \textbf{Accuracy} 0.875, \textbf{F1-score} 0.732, \textbf{AUC-ROC} 0.932, \textbf{Average Precision} 0.844 e \textbf{Brier Score} 0.087. 
+L’analisi della matrice di confusione evidenzia un buon compromesso sulla classe minoritaria (\(>50K\)), con \textit{recall} pari a 0.68 e \textit{precision} pari a 0.79 per tale classe. 
+Il confronto tra performance su training set e test set mostra un gap contenuto (circa 0.015 in accuracy), suggerendo un rischio di overfitting limitato. 
+
+\newpage
+\section{Analisi del Modello Finale}
+
+\subsection{Selezione del Modello}
+
+Come discusso nella sezione precedente, i risultati della fase di benchmarking e tuning sono stati sintetizzati in una classifica unica che include sia i modelli base sia le rispettive versioni ottimizzate.  
+Sulla base dell’F1-score medio in cross-validation, il modello selezionato come migliore compromesso tra performance, stabilità ed efficienza computazionale è risultato essere {LightGBM ottimizzato}.
+
+\subsection{Valutazione Finale su Test Set}
+
+Il modello selezionato è stato valutato su un test set completamente indipendente, mai utilizzato durante le fasi di addestramento, selezione o ottimizzazione degli iperparametri.  
+Questa valutazione fornisce una stima realistica delle prestazioni attese in uno scenario operativo reale.
+
+Le prestazioni ottenute sono:
+\begin{itemize}
+    \item \textbf{Accuracy}: 0.8749
+    \item \textbf{F1-score}: 0.7315
+    \item \textbf{AUC-ROC}: 0.932
+\end{itemize}
+
+\noindent
+L’analisi della matrice di confusione evidenzia un buon compromesso tra precisione e capacità di individuare correttamente la classe minoritaria ($>50K$), confermando la validità della scelta della metrica F1-score come criterio principale di selezione.
+
+\subsection{Analisi della Generalizzazione}
+
+Il confronto tra le prestazioni ottenute sul training set e sul test set mostra uno scostamento contenuto (gap inferiore a 0.02 in accuracy), indicando un rischio di overfitting basso.  
+Questo risultato suggerisce che il modello abbia appreso pattern generalizzabili piuttosto che memorizzare specificità del campione di addestramento. La stabilità delle performance osservata anche negli altri modelli di boosting conferma l’efficacia delle scelte di preprocessing, selezione delle feature e regolarizzazione implicita adottate nel processo di modellazione.
+
+\paragraph{Osservazioni metodologiche}
+\begin{itemize}
+    \item L’uso selettivo dello scaling esclusivamente per i modelli sensibili alla scala ha permesso un confronto più equo tra algoritmi eterogenei.
+    \item La validazione incrociata a 3 fold rappresenta un compromesso tra affidabilità della stima e costo computazionale; un numero maggiore di fold potrebbe ridurre ulteriormente la varianza della stima.
+    \item La scelta di limitare il tuning ai modelli migliori emersi dal benchmark iniziale ha consentito un utilizzo efficiente delle risorse computazionali, mantenendo al contempo un approccio rigoroso.
+\end{itemize}
+
+\newpage
+\section{Conclusioni}
+
+In questo lavoro è stato affrontato il problema della previsione del reddito individuale utilizzando il dataset \textit{Adult Census Income}, seguendo un flusso metodologico strutturato che va dall’analisi esplorativa dei dati fino alla selezione di un modello predittivo finale.
+
+\noindent
+I risultati mostrano come i modelli di gradient boosting moderno, in particolare {LightGBM}, siano in grado di catturare efficacemente le relazioni non lineari presenti nei dati tabellari eterogenei, ottenendo prestazioni elevate e stabili anche in presenza di classi sbilanciate.
+
+\noindent
+Tra i principali limiti del lavoro si segnala l’utilizzo di una singola metrica di selezione primaria e una validazione incrociata con un numero limitato di fold. Inoltre, il dataset analizzato presenta una forte omogeneità geografica, che potrebbe limitare la generalizzabilità dei risultati a contesti differenti.
+
+
+
+
+
+\newpage
+\begin{appendices}
+    \setupappendixstyle
+    \input{appendice_eda.tex}
+    \newpage
+    \input{appendice_test_statistici.tex}
+    \newpage
+    \input{feature_engineering.tex}
+    \newpage
+    \input{data_splitting.tex}
+    \newpage
+    \input{encoding.tex}
+    \newpage
+    \input{benchmark.tex}
+    \newpage
+    \input{iperparametri.tex}
+    \newpage
+    \input{finale.tex}
+\end{appendices}
+
+\end{document}
+

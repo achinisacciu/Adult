@@ -1,0 +1,64 @@
+% Reset dei contatori per l'appendice
+\setcounter{figure}{0}
+\renewcommand{\thefigure}{A.\arabic{figure}}
+\setcounter{table}{0}
+\renewcommand{\thetable}{A.\arabic{table}}
+\section{Ottimizzazione Iperparametrica e Validazione Finale}
+\label{app:hyperparam_tuning}
+
+Sulla base dei risultati del benchmark preliminare, i classificatori più performanti sono stati sottoposti a una procedura di ottimizzazione fine Hyperparameter Tuning volta a massimizzare la capacità di generalizzazione e prevenire l'overfitting.
+
+\subsection{Strategia di Ottimizzazione (Randomized Search)}
+
+L'esplorazione dello spazio degli iperparametri \(\Theta\) è stata condotta mediante \textbf{Randomized Search CV}. A differenza della Grid Search esaustiva, questo metodo campiona un numero fisso di configurazioni (\(N_{iter}=230\)) da distribuzioni di probabilità definite a priori. Tale approccio consente di esplorare efficientemente spazi ad alta dimensionalità con un budget computazionale limitato.
+
+Per ogni modello candidato \(M_i\), è stata definita una griglia di ricerca specifica. Nel caso del vincitore \textit{XGBoost}, i parametri critici ottimizzati includono:
+\begin{itemize}
+    \item \texttt{learning\_rate}: Tasso di apprendimento (shrinkage).
+    \item \texttt{max\_depth}: Profondità massima dell'albero (controllo overfitting locale).
+    \item \texttt{colsample\_bytree}: Frazione di feature campionate per albero (decorrelazione).
+    \item \texttt{subsample}: Frazione di dati campionati (Bagging stocastico).
+\end{itemize}
+
+\subsection{Selezione del Modello "Champion"}
+
+La Tabella \ref{tab:final_ranking} riporta la classifica definitiva aggregata, confrontando le varianti Base e Tuned per i modelli al vertice.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{llcc}
+\toprule
+\textbf{Rank} & \textbf{Modello} & \textbf{Configurazione} & \textbf{CV F1-Score} \\
+\midrule
+\textbf{1} & \textbf{XGBoost} & \textbf{Tuned} & \textbf{0.7310} \\
+2 & LightGBM & Tuned & 0.7194 \\
+3 & XGBoost & Base & 0.7156 \\
+4 & LightGBM & Base & 0.7156 \\
+5 & Linear SVC & Tuned & 0.6819 \\
+6 & AdaBoost & Tuned & 0.6614 \\
+\bottomrule
+\end{tabular}
+\caption{Leaderboard finale post-ottimizzazione. XGBoost Tuned emerge come Best Performer.}
+\label{tab:final_ranking}
+\end{table}
+
+\noindent
+Il modello \textbf{XGBoost (Tuned)} è stato proclamato vincitore con un F1-Score medio di validazione pari a 0.7310. L'ottimizzazione ha prodotto un incremento evidente rispetto alla baseline (+1.54\%), confermando l'efficacia della ricerca degli iperparametri nell'affinare le performance e la stabilità del classificatore.
+
+\subsection{Validazione su Test Set (Hold-out)}
+
+La valutazione finale dell'architettura selezionata è stata eseguita sul Test Set \(S_{test}\) (\(N=6.028\)), mantenuto segregato durante l'intera pipeline di training e tuning. I risultati rappresentano una stima non distorta delle performance attese in produzione.
+
+\begin{itemize}
+    \item \textbf{Accuracy:} \(0.8540\) (Il modello classifica correttamente l'85.4\% degli individui).
+    \item \textbf{F1-Score (Classe \(>50K\)):} \(0.7330\).
+\end{itemize}
+
+\subsection{Analisi degli Errori}
+Il report di classificazione evidenzia un comportamento tipico nella gestione di classi non perfettamente bilanciate:
+\begin{itemize}
+    \item \textbf{Trade-off Precision/Recall:} Il modello dimostra di saper bilanciare in modo ottimale l'affidabilità delle sue previsioni positive (Precision) con la sua capacità di catturare la maggior parte degli individui target (Recall).
+\end{itemize}
+
+\noindent
+Tale trade-off è perfettamente in linea con l'obiettivo di massimizzare l'F1-Score globale. Il raggiungimento di quota 0.7330 sul Test Set certifica che il modello mantiene un eccellente equilibrio tra la purezza delle predizioni e la copertura del target, confermando la solidità del tuning effettuato.
